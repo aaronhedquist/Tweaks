@@ -64,6 +64,7 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
         
         _whammyBarGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(whammyBarUpdated:)];
         [_whammyBarView addGestureRecognizer:_whammyBarGesture];
+        _whammyBarView.hidden = YES;
         
         self.detailTextLabel.textColor = [UIColor blackColor];
     }
@@ -164,11 +165,13 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
         _switch.hidden = NO;
         _textField.hidden = YES;
         _stepper.hidden = YES;
+        _whammyBarView.hidden = YES;
     } else if (_mode == _FBTweakTableViewCellModeInteger) {
         _switch.hidden = YES;
         _textField.hidden = NO;
         _textField.keyboardType = UIKeyboardTypeNumberPad;
         _stepper.hidden = NO;
+        _whammyBarView.hidden = YES;
         if (_tweak.stepValue) {
             _stepper.stepValue = [_tweak.stepValue floatValue];
         } else {
@@ -191,6 +194,7 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
         _textField.hidden = NO;
         _textField.keyboardType = UIKeyboardTypeDecimalPad;
         _stepper.hidden = NO;
+        _whammyBarView.hidden = NO;
         
         if (_tweak.stepValue) {
             _stepper.stepValue = [_tweak.stepValue floatValue];
@@ -214,8 +218,6 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
             _stepper.maximumValue = [_tweak.defaultValue doubleValue] * 10.0;
         }
         
-        _whammyBarView.hidden = NO;
-        
         if (!_tweak.stepValue) {
             _stepper.stepValue = fminf(1.0, (_stepper.maximumValue - _stepper.minimumValue) / 100.0);
         }
@@ -224,10 +226,12 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
         _textField.hidden = NO;
         _textField.keyboardType = UIKeyboardTypeDefault;
         _stepper.hidden = YES;
+        _whammyBarView.hidden = YES;
     } else if (_mode == _FBTweakTableViewCellModeAction) {
         _switch.hidden = YES;
         _textField.hidden = YES;
         _stepper.hidden = YES;
+        _whammyBarView.hidden = YES;
         
         self.accessoryView = nil;
         self.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -236,6 +240,7 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
         _switch.hidden = YES;
         _textField.hidden = YES;
         _stepper.hidden = YES;
+        _whammyBarView.hidden = YES;
         self.accessoryView = nil;
         self.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         self.selectionStyle = UITableViewCellSelectionStyleBlue;
@@ -243,6 +248,7 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
         _switch.hidden = YES;
         _textField.hidden = YES;
         _stepper.hidden = YES;
+        _whammyBarView.hidden = YES;
         self.accessoryView = nil;
         self.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         self.selectionStyle = UITableViewCellSelectionStyleBlue;
@@ -250,6 +256,7 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
         _switch.hidden = YES;
         _textField.hidden = YES;
         _stepper.hidden = YES;
+        _whammyBarView.hidden = YES;
     }
     
     [self setNeedsLayout];
@@ -318,14 +325,13 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
         if (panGesture.state == UIGestureRecognizerStateBegan) {
             
             _whammyBarView.backgroundColor = [UIColor colorWithRed:0.223 green:1.000 blue:0.490 alpha:1.000];
-            _whammyBarView.layer.transform = CATransform3DMakeScale(2.5, 2.5, 1.0);
             
         } else if (panGesture.state == UIGestureRecognizerStateChanged) {
             
             CGPoint newPoint = [panGesture translationInView:[panGesture view]];
             
             // Make the maximum gesture distance dependent on the size of the view
-            CGFloat newValue = (newPoint.x * _stepper.maximumValue / (self.bounds.size.width/2)) + 0.5;
+            CGFloat newValue = (newPoint.x * _stepper.maximumValue / (self.bounds.size.width/2)) + (_stepper.maximumValue / 2);
             newValue = fminf(_stepper.maximumValue, newValue);
             newValue = fmaxf(0.001, newValue);
             
@@ -334,7 +340,6 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
         } else if (panGesture.state == UIGestureRecognizerStateEnded) {
             
             _whammyBarView.backgroundColor = [UIColor colorWithWhite:0.251 alpha:1.000];
-            _whammyBarView.layer.transform = CATransform3DMakeScale(1.0, 1.0, 1.0);
             
         }
         
