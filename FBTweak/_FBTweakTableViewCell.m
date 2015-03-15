@@ -314,10 +314,10 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
         } else if (panGesture.state == UIGestureRecognizerStateChanged) {
             
             CGPoint newPoint = [panGesture locationInView:[panGesture view]];
-            CGFloat deltaX = _whammyTouchPoint.x - newPoint.x;
+            CGFloat deltaX = newPoint.x - _whammyTouchPoint.x;
             
             // Make the maximum gesture distance dependent on the size of the view
-            CGFloat newValue = deltaX / self.bounds.size.width - 100;
+            CGFloat newValue = deltaX / self.bounds.size.width / 2;
             
             [self _updateValue:@(newValue) primary:NO write:YES];
             
