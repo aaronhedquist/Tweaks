@@ -31,6 +31,8 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
   UISwitch *_switch;
   UITextField *_textField;
   UIStepper *_stepper;
+    UIPanGestureRecognizer *_whammyBarGesture;
+    CGPoint _whammyTouchPoint;
 }
 
 - (instancetype)initWithReuseIdentifier:(NSString *)reuseIdentifier;
@@ -46,6 +48,9 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
     _textField.textAlignment = NSTextAlignmentRight;
     _textField.delegate = self;
     [_accessoryView addSubview:_textField];
+      
+      _whammyBarGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(whammyBarUpdated:)];
+      [_textField addGestureRecognizer:_whammyBarGesture];
     
     _stepper = [[UIStepper alloc] init];
     [_stepper addTarget:self action:@selector(_stepperChanged:) forControlEvents:UIControlEventValueChanged];
@@ -196,6 +201,10 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
     } else {
       _stepper.maximumValue = [_tweak.defaultValue doubleValue] * 10.0;
     }
+      
+      if (_tweak.minimumValue != nil && _tweak.maximumValue != nil) {
+          _whammyBarGesture.enabled = YES;
+      }
     
     if (!_tweak.stepValue) {
       _stepper.stepValue = fminf(1.0, (_stepper.maximumValue - _stepper.minimumValue) / 100.0);
@@ -289,6 +298,33 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
   } else {
     [self _updateValue:@(stepper.value) primary:NO write:YES];
   }
+}
+
+- (void)whammyBarUpdated:(UIPanGestureRecognizer *)panGesture
+{
+    
+    if (_mode == _FBTweakTableViewCellModeReal &&
+        _tweak.minimumValue != nil &&
+        _tweak.maximumValue != nil) {
+        
+        if (panGesture.state == UIGestureRecognizerStateBegan) {
+            
+            _whammyTouchPoint = [panGesture locationInView:[panGesture view]];
+            
+        } else if (panGesture.state == UIGestureRecognizerStateChanged) {
+            
+            CGPoint newPoint = [panGesture locationInView:[panGesture view]];
+            CGFloat deltaX = _whammyTouchPoint.x - newPoint.x;
+            
+            // Make the maximum gesture distance dependent on the size of the view
+            CGFloat newValue = deltaX / self.bounds.size.width - 100;
+            
+            [self _updateValue:@(newValue) primary:NO write:YES];
+            
+        }
+        
+    }
+    
 }
 
 - (void)_updateValue:(FBTweakValue)value primary:(BOOL)primary write:(BOOL)write
