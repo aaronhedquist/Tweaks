@@ -32,7 +32,6 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
   UITextField *_textField;
   UIStepper *_stepper;
     UIPanGestureRecognizer *_whammyBarGesture;
-    CGPoint _whammyTouchPoint;
 }
 
 - (instancetype)initWithReuseIdentifier:(NSString *)reuseIdentifier;
@@ -307,17 +306,12 @@ typedef NS_ENUM(NSUInteger, _FBTweakTableViewCellMode) {
         _tweak.minimumValue != nil &&
         _tweak.maximumValue != nil) {
         
-        if (panGesture.state == UIGestureRecognizerStateBegan) {
-            
-            _whammyTouchPoint = [panGesture locationInView:[panGesture view]];
-            
-        } else if (panGesture.state == UIGestureRecognizerStateChanged) {
+        if (panGesture.state == UIGestureRecognizerStateChanged) {
             
             CGPoint newPoint = [panGesture locationInView:[panGesture view]];
-            CGFloat deltaX = newPoint.x - _whammyTouchPoint.x;
             
             // Make the maximum gesture distance dependent on the size of the view
-            CGFloat newValue = deltaX / self.bounds.size.width / 2;
+            CGFloat newValue = newPoint.x / self.bounds.size.width / 2;
             
             [self _updateValue:@(newValue) primary:NO write:YES];
             
